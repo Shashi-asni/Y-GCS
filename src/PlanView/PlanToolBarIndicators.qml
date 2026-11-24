@@ -15,6 +15,8 @@ RowLayout {
     required property var planMasterController
     property string statusHint: ""     ///< Guidance for the user, shown as a pill; empty hides it
 
+    signal scheduleClicked()
+
     property var _planMasterController: planMasterController
     property var _missionController: _planMasterController.missionController
     property var _geoFenceController: _planMasterController.geoFenceController
@@ -136,6 +138,14 @@ RowLayout {
         visible: !_syncInProgress
         primary: _uploadDirty && !_controllerOffline
         onClicked: { toolbarButtonClicked(); _uploadClicked() }
+    }
+
+    QGCButton {
+        objectName: "planToolbar_scheduleButton"
+        text: qsTr("Schedule")
+        iconSource: "/InstrumentValueIcons/timer.svg"
+        enabled: !_syncInProgress && _hasPlanItems
+        onClicked: { toolbarButtonClicked(); root.scheduleClicked() }
     }
 
     QGCButton {

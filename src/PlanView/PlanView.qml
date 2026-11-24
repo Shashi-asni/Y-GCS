@@ -40,6 +40,104 @@ Item {
     property bool   _addROIOnClick: false
     property bool   _addWaypointOnClick: false
 
+    // Scheduled mission auto-start: load the saved plan snapshot, upload it,
+    // then start the mission once the vehicle acknowledges the upload.
+    property var    _scheduledEntry: null
+    property int    _scheduledPollAttempts: 0
+    property bool   _scheduledUploadStarted: false
+
+    function startScheduledMission(entry) {
+        const vehicle = QGroundControl.multiVehicleManager.activeVehicle
+        if (!vehicle || vehicle.isOfflineEditingVehicle) {
+            if (mainWindow.missionScheduler) {
+                mainWindow.missionScheduler.markWaiting(entry.id)
+            }
+            return
+        }
+        // The mission was uploaded when the schedule was created: launch it
+        // directly instead of uploading again.
+        if (entry.uploaded && entry.vehicleId === vehicle.id) {
+            vehicle.startMission()
+            if (mainWindow.missionScheduler) {
+                mainWindow.missionScheduler.complete(entry.id)
+            }
+            mainWindow.showFlyView()
+            return
+        }
+        _scheduledEntry = entry
+        _scheduledPollAttempts = 0
+        _scheduledUploadStarted = false
+        if (entry.planFile) {
+            _planMasterController.loadFromFile(entry.planFile)
+        }
+        _scheduledPoll.restart()
+    }
+
+    function _failScheduled(reason) {
+        const entry = _scheduledEntry
+        _scheduledEntry = null
+        if (entry && mainWindow.missionScheduler) {
+            mainWindow.missionScheduler.fail(entry.id, reason)
+        }
+    }
+
+    Timer {
+        id: _scheduledPoll
+        interval: 700
+        repeat: true
+        onTriggered: {
+            if (!_scheduledEntry) {
+                stop()
+                return
+            }
+            _scheduledPollAttempts++
+            if (_planMasterController.syncInProgress) {
+                return
+            }
+            const entry = _scheduledEntry
+            if (entry.planFile && _planMasterController.currentPlanFile !== entry.planFile) {
+                if (_scheduledPollAttempts > 80) {
+                    stop()
+                    _failScheduled(qsTr("Timed out loading the saved plan."))
+                }
+                return
+            }
+            if (!_planMasterController.containsItems) {
+                if (_scheduledPollAttempts > 80) {
+                    stop()
+                    _failScheduled(qsTr("The scheduled plan is empty."))
+                }
+                return
+            }
+            if (!_scheduledUploadStarted) {
+                _scheduledUploadStarted = true
+                _planMasterController.sendToVehicle()
+                return
+            }
+            if (_planMasterController.dirtyForUpload) {
+                if (_scheduledPollAttempts > 100) {
+                    stop()
+                    _failScheduled(qsTr("Timed out uploading the mission."))
+                }
+                return
+            }
+            stop()
+            _scheduledEntry = null
+            const vehicle = QGroundControl.multiVehicleManager.activeVehicle
+            if (!vehicle || vehicle.isOfflineEditingVehicle) {
+                if (mainWindow.missionScheduler) {
+                    mainWindow.missionScheduler.markWaiting(entry.id)
+                }
+                return
+            }
+            vehicle.startMission()
+            if (mainWindow.missionScheduler) {
+                mainWindow.missionScheduler.complete(entry.id)
+            }
+            mainWindow.showFlyView()
+        }
+    }
+
     // The map is created by editorMapLoader: QtLocation FlightMap or, when enabled, the experimental GeoMap engine
     readonly property var   editorMap: editorMapLoader.item
     readonly property real  _nonInteractiveOpacity: 0.5
@@ -323,6 +421,7 @@ Item {
             }
             return ""
         }
+        onScheduleClicked: schedulerPanel.openPanel()
     }
 
     Item {
@@ -635,6 +734,13 @@ Item {
             }
 
             model: toolStripActionList.model
+        }
+
+        YGCSMissionSchedulerPanel {
+            id: schedulerPanel
+            scheduler: mainWindow.missionScheduler
+            planController: _planMasterController
+            onStartRequested: (entry) => _root.startScheduledMission(entry)
         }
 
         // The GeoMap engine shows its own scale next to its camera controls

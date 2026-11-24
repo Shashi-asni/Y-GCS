@@ -83,6 +83,7 @@ qt_add_qml_module(
         TransformEditor.qml
         VTOLLandingPatternEditor.qml
         VTOLLandingPatternMapVisual.qml
+        YGCSMissionSchedulerPanel.qml
     NO_PLUGIN
 )
 

@@ -6,10 +6,12 @@ import QGroundControl.Controls
 
 Rectangle {
     id:         _root
-    color:      qgcPal.windowTransparent
+    color:      "#F2111827"
+    border.color: "#27272a"
+    border.width: 1
     width:      ScreenTools.defaultFontPixelWidth * 7
     height:     Math.min(maxHeight, toolStripColumn.height + (flickable.anchors.margins * 2))
-    radius:     ScreenTools.defaultFontPixelWidth / 2
+    radius:     12
 
     property alias  model:              repeater.model
     property real   maxHeight           ///< Maximum height for control, determines whether text is hidden to make control shorter

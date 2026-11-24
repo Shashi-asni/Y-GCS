@@ -16,7 +16,7 @@ Item {
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
-    property color  _mainStatusBGColor: qgcPal.brandPrimary
+    property color  _mainStatusBGColor: "#12172a"
     property real   _leftRightMargin:   ScreenTools.defaultFontPixelWidth * 0.75
     property var    _guidedController:  globals.guidedControllerFlyView
 
@@ -51,8 +51,7 @@ Item {
                     gradient: Gradient {
                         orientation: Gradient.Horizontal
                         GradientStop { position: 0; color: _mainStatusBGColor }
-                        //GradientStop { position: qgcButton.x + qgcButton.width; color: _mainStatusBGColor }
-                        GradientStop { position: 1; color: qgcPal.window }
+                        GradientStop { position: 1; color: "#0b1020" }
                     }
                 }
 
@@ -61,7 +60,11 @@ Item {
                     anchors.left:   gradientBackground.right
                     anchors.right:  parent.right
                     height:         parent.height
-                    color:          qgcPal.windowTransparent
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0; color: "#12172a" }
+                        GradientStop { position: 1; color: "#0b1020" }
+                    }
                 }
 
                 RowLayout {
@@ -78,7 +81,7 @@ Item {
                             id:                 qgcButton
                             objectName:         "toolbar_qgcLogo"
                             Layout.fillHeight:  true
-                            icon.source:        "/res/QGCLogoFull.svg"
+                            icon.source:        "/res/YGCSLogoFull.png"
                             logo:               true
                             onClicked:          mainWindow.showToolSelectDialog()
                         }
@@ -183,5 +186,14 @@ Item {
 
     ParameterDownloadProgress {
         anchors.fill: parent
+    }
+
+    // YantraYug navbar divider
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 1
+        color: "#272d42"
     }
 }

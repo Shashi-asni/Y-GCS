@@ -4,6 +4,12 @@
 
 qt_add_library(QGroundControlModule STATIC)
 
+target_sources(QGroundControlModule PRIVATE
+    MainWindow/YGCSScheduler.cc
+    MainWindow/YGCSScheduler.h
+)
+
+
 # ----------------------------------------------------------------------------
 # QML Resources
 # ----------------------------------------------------------------------------

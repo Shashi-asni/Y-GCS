@@ -14,7 +14,7 @@ AnalyzePage {
     id: root
 
     pageComponent:      recordingsComponent
-    pageDescription:    qsTr("Play the videos QGroundControl recorded, with the telemetry recorded alongside them.")
+    pageDescription:    qsTr("Play the videos Y-GCS recorded, with the telemetry recorded alongside them.")
 
     readonly property real _margin: ScreenTools.defaultFontPixelWidth
 
@@ -85,7 +85,7 @@ AnalyzePage {
                 // Releases the file, which some platforms won't delete while it is open.
                 page.selectedPath = ""
                 if (!recordingList.remove(path)) {
-                    QGroundControl.showMessageDialog(root, qsTr("Delete Recording"),
+                    Y-GCS.showMessageDialog(root, qsTr("Delete Recording"),
                                                      qsTr("The recording could not be deleted."))
                 }
             }

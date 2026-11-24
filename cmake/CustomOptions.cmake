@@ -18,28 +18,28 @@ set(QGC_CUSTOM_DIR
 # ============================================================================
 
 set(QGC_APP_NAME
-    "QGroundControl"
+    "Y-GCS"
     CACHE STRING "Application name"
 )
 string(TIMESTAMP _copyright_year "%Y")
 set(QGC_APP_COPYRIGHT
-    "Copyright (c) ${_copyright_year} QGroundControl. All rights reserved."
+    "Copyright (c) ${_copyright_year} YantraYug. All rights reserved."
     CACHE STRING "Copyright notice"
 )
 set(QGC_APP_DESCRIPTION
-    "Open Source Ground Control App"
+    "YantraYug Ground Control Station"
     CACHE STRING "Application description"
 )
 set(QGC_ORG_NAME
-    "QGroundControl"
+    "YantraYug"
     CACHE STRING "Organization name"
 )
 set(QGC_ORG_DOMAIN
-    "qgroundcontrol.com"
+    "yantrayug.com"
     CACHE STRING "Organization domain"
 )
 set(QGC_PACKAGE_NAME
-    "org.mavlink.qgroundcontrol"
+    "org.yantrayug.ygcs"
     CACHE STRING "Package identifier"
 )
 
@@ -54,7 +54,7 @@ set(QGC_SETTINGS_VERSION
 # ============================================================================
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(QGC_STABLE_BUILD "Stable release build (disables daily build features)" OFF)
+set(QGC_STABLE_BUILD ON CACHE BOOL "Stable release build (disables daily build features)" FORCE)
 option(QGC_USE_CACHE "Enable compiler caching (ccache/sccache)" ON)
 option(QGC_USE_MOCCACHE "Cache moc output across clean builds" ON)
 option(QGC_UNITY_BUILD "Enable unity builds of QGC targets (third-party sources stay per-file)" OFF)
@@ -315,7 +315,7 @@ set(QGC_APPIMAGE_METADATA_PATH
     CACHE FILEPATH "AppImage metadata path"
 )
 set(QGC_APPIMAGE_APPDATA_DEVELOPER
-    "qgroundcontrol"
+    "yantrayug"
     CACHE STRING "AppImage developer name"
 )
 # Optional CPack native package built by the `qgc-package` target, alongside the

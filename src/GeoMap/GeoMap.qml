@@ -585,7 +585,7 @@ Item {
 
         Image {
             id: gcsImage
-            source: isNaN(gcsIndicator._gcsHeading) ? "/res/QGCLogoFull.svg" : "/res/QGCLogoArrow.svg"
+            source: isNaN(gcsIndicator._gcsHeading) ? "/res/YGCSLogoFull.png" : "/res/QGCLogoArrow.svg"
             mipmap: true
             antialiasing: true
             fillMode: Image.PreserveAspectFit

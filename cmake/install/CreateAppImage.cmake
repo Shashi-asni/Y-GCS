@@ -215,6 +215,28 @@ set(_appimagetool_args --no-appstream)
 if(QGC_APPIMAGE_UPDATE_INFORMATION)
     list(APPEND _appimagetool_args --updateinformation "${QGC_APPIMAGE_UPDATE_INFORMATION}")
 endif()
+
+# appimagetool's built-in runtime downloader mishandles GitHub's 302 redirect and
+# fails intermittently. Fetch the runtime ourselves (resilient, redirect-aware)
+# and hand it over explicitly; on failure fall back to appimagetool's downloader.
+set(_appimage_runtime_file "${QGC_APPIMAGE_BUILD_DIR}/tools/runtime-${CMAKE_SYSTEM_PROCESSOR}")
+if(NOT EXISTS "${_appimage_runtime_file}")
+    qgc_resilient_download(
+        FILENAME "runtime-${CMAKE_SYSTEM_PROCESSOR}"
+        DESTINATION_DIR "${QGC_APPIMAGE_BUILD_DIR}/tools"
+        RESULT_VAR _appimage_runtime_file
+        URLS "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-${CMAKE_SYSTEM_PROCESSOR}"
+        TIMEOUT 300
+        INACTIVITY_TIMEOUT 30
+        LOG_TAG "QGC"
+        ALLOW_FAILURE
+    )
+endif()
+if(_appimage_runtime_file AND EXISTS "${_appimage_runtime_file}")
+    list(APPEND _appimagetool_args --runtime-file "${_appimage_runtime_file}")
+else()
+    message(WARNING "QGC: could not prefetch the AppImage runtime; appimagetool will download it")
+endif()
 execute_process(
     COMMAND "${APPIMAGETOOL_PATH}" ${_appimagetool_args} "${APPDIR_PATH}" "${APPIMAGE_PATH}" COMMAND_ECHO STDOUT
             COMMAND_ERROR_IS_FATAL ANY

@@ -17,10 +17,15 @@ Rectangle {
     property real _controllerProgressPct: planMasterController.missionController.progressPct
 
     signal toolbarButtonClicked()
+    signal scheduleClicked()
 
     width: parent.width
     height: ScreenTools.toolbarHeight
-    color: qgcPal.toolbarBackground
+    gradient: Gradient {
+        orientation: Gradient.Horizontal
+        GradientStop { position: 0; color: "#12172a" }
+        GradientStop { position: 1; color: "#0b1020" }
+    }
 
     QGCPalette { id: qgcPal }
 
@@ -30,15 +35,14 @@ Rectangle {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: 1
-        color: "black"
-        visible: qgcPal.globalTheme === QGCPalette.Light
+        color: "#272d42"
     }
 
     QGCToolBarButton {
         id: qgcButton
         objectName: "toolbar_qgcLogo"
         height: parent.height
-        icon.source: "/res/QGCLogoFull.svg"
+        icon.source: "/res/YGCSLogoFull.png"
         logo: true
         onClicked: mainWindow.showToolSelectDialog()
     }
@@ -60,6 +64,7 @@ Rectangle {
             planMasterController: _root.planMasterController
             statusHint: _root.statusHint
             onToolbarButtonClicked: _root.toolbarButtonClicked()
+            onScheduleClicked: _root.scheduleClicked()
         }
     }
 

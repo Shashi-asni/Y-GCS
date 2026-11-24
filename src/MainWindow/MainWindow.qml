@@ -9,6 +9,7 @@ import QGroundControl.Controls
 import QGroundControl.FactControls
 import QGroundControl.FlyView
 import QGroundControl.FlightMap
+import YGCS 1.0
 import QGroundControl.PlanView
 import QGroundControl.Toolbar
 
@@ -66,6 +67,9 @@ ApplicationWindow {
 
     readonly property real      _topBottomMargins:          ScreenTools.defaultFontPixelHeight * 0.5
 
+    /// Persisted mission scheduler shared with the Plan view.
+    property alias missionScheduler: ygcsScheduler
+
     //-------------------------------------------------------------------------
     //-- Global Scope Variables
 
@@ -90,6 +94,33 @@ ApplicationWindow {
 
     /// Default color palette used throughout the UI
     QGCPalette { id: qgcPal; colorGroupEnabled: true }
+
+    YGCSMissionScheduler {
+        id: ygcsScheduler
+    }
+
+    Connections {
+        target: ygcsScheduler
+        function onDue(entry) { mainWindow.handleScheduledMission(entry) }
+    }
+
+    Connections {
+        target: QGroundControl.multiVehicleManager
+        function onActiveVehicleChanged() { ygcsScheduler.retryWaiting() }
+    }
+
+    function handleScheduledMission(entry) {
+        const vehicle = QGroundControl.multiVehicleManager.activeVehicle
+        if (!vehicle || vehicle.isOfflineEditingVehicle) {
+            ygcsScheduler.markWaiting(entry.id)
+            validationErrorToast.text = qsTr("\"%1\" is due but no vehicle is connected. It will start when a vehicle connects.").arg(entry.name)
+            validationErrorToast.open()
+            return
+        }
+        validationErrorToast.text = qsTr("Scheduled mission \"%1\" is starting...").arg(entry.name)
+        validationErrorToast.open()
+        planView.startScheduledMission(entry)
+    }
 
     //-------------------------------------------------------------------------
     //-- Actions
@@ -173,7 +204,7 @@ ApplicationWindow {
     }
 
     function showSettingsTool(settingsPage = "") {
-        showTool(qsTr("Application Settings"), "qrc:/qml/QGroundControl/Controls/AppSettings.qml", "/res/QGCLogoWhite")
+        showTool(qsTr("Application Settings"), "qrc:/qml/QGroundControl/Controls/AppSettings.qml", "/qmlimages/Gears.svg")
         if (settingsPage !== "") {
             toolDrawerLoader.item.showSettingsPage(settingsPage)
         }
@@ -453,7 +484,11 @@ ApplicationWindow {
             anchors.right:  parent.right
             anchors.top:    parent.top
             height:         ScreenTools.toolbarHeight
-            color:          qgcPal.toolbarBackground
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "#12172a" }
+                GradientStop { position: 1; color: "#0b1020" }
+            }
 
             RowLayout {
                 id:                 toolDrawerToolbarLayout
@@ -467,7 +502,7 @@ ApplicationWindow {
                     id: qgcButton
                     objectName: "toolbar_qgcLogo"
                     height: parent.height
-                    icon.source: "/res/QGCLogoFull.svg"
+                    icon.source: "/res/YGCSLogoFull.png"
                     logo: true
                     onClicked: mainWindow.showToolSelectDialog()
                 }

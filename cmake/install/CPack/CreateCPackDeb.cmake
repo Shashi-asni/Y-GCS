@@ -15,9 +15,9 @@ set(CPACK_BINARY_DEB ON)
 # Package Metadata
 # ----------------------------------------------------------------------------
 set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/QGroundControl")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${CMAKE_PROJECT_NAME}")
 list(APPEND CPACK_PRE_BUILD_SCRIPTS "${CMAKE_SOURCE_DIR}/cmake/install/FinalizeNativePackage.cmake")
-set(CPACK_DEBIAN_PACKAGE_NAME "qgroundcontrol")
+set(CPACK_DEBIAN_PACKAGE_NAME "y-gcs")
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 # set(CPACK_DEBIAN_PACKAGE_EPOCH
 set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
@@ -28,9 +28,9 @@ set(CPACK_DEBIAN_PACKAGE_RELEASE "${QGC_APP_VERSION_DEV}.g${QGC_GIT_HASH}")
 # set(CPACK_DEBIAN_PACKAGE_DEPENDS
 # set(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS
 # Debian policy requires "Name <email>"; bare "Dronecode" is malformed.
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dronecode <dev@dronecode.org>")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "YantraYug <support@yantrayug.com>")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
-    "QGroundControl provides full flight control and mission planning for MAVLink-compatible vehicles."
+    "Y-GCS provides full flight control and mission planning for MAVLink-compatible vehicles."
 )
 set(CPACK_DEBIAN_PACKAGE_SECTION "electronics")
 # CPACK_DEBIAN_ARCHIVE_TYPE is the data.tar archive *format* (gnutar/paxr), not
@@ -44,7 +44,7 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${PROJECT_HOMEPAGE_URL}")
 # Advanced DEB Options
 # ----------------------------------------------------------------------------
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS "/opt/QGroundControl/lib")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS "/opt/${CMAKE_PROJECT_NAME}/lib")
 # set(CPACK_DEBIAN_PACKAGE_DEBUG
 # set(CPACK_DEBIAN_PACKAGE_PREDEPENDS
 # set(CPACK_DEBIAN_PACKAGE_ENHANCES

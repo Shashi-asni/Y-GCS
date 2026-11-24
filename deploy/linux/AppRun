@@ -74,14 +74,28 @@ unset QML2_IMPORT_PATH
 export XDG_DATA_DIRS="${APPDIR}/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
 QGC_BINARY=""
-for expected_name in QGroundControl Custom-QGroundControl; do
-    if [ -x "${APPDIR}/usr/bin/${expected_name}" ] && [ -f "${APPDIR}/usr/bin/${expected_name}" ]; then
-        QGC_BINARY="${APPDIR}/usr/bin/${expected_name}"
+# Prefer the executable named by the bundled desktop entry so rebranded builds
+# (e.g. Y-GCS) launch correctly without hard-coding the product name.
+for desktop_file in "${APPDIR}"/usr/share/applications/*.desktop; do
+    [ -f "$desktop_file" ] || continue
+    desktop_exec=$(sed -n 's/^Exec=\([^ ]*\).*/\1/p' "$desktop_file" | head -n 1)
+    if [ -n "$desktop_exec" ] && [ -x "${APPDIR}/usr/bin/${desktop_exec}" ] && [ -f "${APPDIR}/usr/bin/${desktop_exec}" ]; then
+        QGC_BINARY="${APPDIR}/usr/bin/${desktop_exec}"
         break
     fi
 done
 if [ -z "$QGC_BINARY" ]; then
+    for expected_name in QGroundControl Custom-QGroundControl; do
+        if [ -x "${APPDIR}/usr/bin/${expected_name}" ] && [ -f "${APPDIR}/usr/bin/${expected_name}" ]; then
+            QGC_BINARY="${APPDIR}/usr/bin/${expected_name}"
+            break
+        fi
+    done
+fi
+if [ -z "$QGC_BINARY" ]; then
     for bin in "${APPDIR}/usr/bin/"*; do
+        # qt.conf is metadata, never the application executable.
+        [ "$(basename "$bin")" = "qt.conf" ] && continue
         if [ -x "$bin" ] && [ -f "$bin" ]; then
             QGC_BINARY="$bin"
             echo "Warning: Using non-standard binary: $(basename "$bin")" >&2

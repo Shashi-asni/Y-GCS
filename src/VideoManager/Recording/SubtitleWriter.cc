@@ -70,7 +70,7 @@ void SubtitleWriter::startCapturingTelemetry(const QString& videoFile, QSize vid
     QTextStream stream(&_file);
     stream << QStringLiteral(
                   "[Script Info]\n"
-                  "Title: QGroundControl Subtitle Telemetry file\n"
+                  "Title: Y-GCS Subtitle Telemetry file\n"
                   "ScriptType: v4.00+\n"
                   "WrapStyle: 0\n"
                   "ScaledBorderAndShadow: yes\n"

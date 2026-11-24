@@ -15,10 +15,10 @@
   <summary>@QGC_APP_DESCRIPTION@</summary>
   <description>
     <p>
-      QGroundControl (QGC) is a highly intuitive and powerful Ground Control Station (GCS) designed for UAVs.
-      Whether you're a first-time pilot or an experienced professional,
-      QGC provides a seamless user experience for flight control and mission planning,
-      making it the go-to solution for any MAVLink-enabled drone.
+      Y-GCS is the YantraYug distribution of QGroundControl (QGC), a highly intuitive and
+      powerful Ground Control Station (GCS) designed for UAVs. Whether you're a first-time pilot
+      or an experienced professional, Y-GCS provides a seamless user experience for flight control
+      and mission planning, making it the go-to solution for any MAVLink-enabled drone.
     </p>
   </description>
   <icon type="stock">@QGC_APP_NAME@</icon>

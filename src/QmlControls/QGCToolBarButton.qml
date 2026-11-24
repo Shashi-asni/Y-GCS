@@ -22,26 +22,33 @@ Button {
 
     background: Rectangle {
         anchors.fill:   parent
-        color:          button.checked ? qgcPal.accent : Qt.rgba(0,0,0,0)
-        border.color:   "red"
-        border.width:   QGroundControl.corePlugin.showTouchAreas ? 3 : 0
+        anchors.margins: 2
+        radius:         ScreenTools.defaultFontPixelWidth * 0.6
+        color:          button.checked
+                        ? qgcPal.accent
+                        : (button.hovered ? Qt.rgba(0.60, 0.42, 1.0, 0.22) : Qt.rgba(0, 0, 0, 0))
+        border.color:   QGroundControl.corePlugin.showTouchAreas ? "red" : qgcPal.brandPrimary
+        border.width:   QGroundControl.corePlugin.showTouchAreas ? 3 : (button.hovered && !button.checked ? 1 : 0)
     }
 
     contentItem: Row {
         spacing:                ScreenTools.defaultFontPixelWidth
         anchors.verticalCenter: button.verticalCenter
-        // Logo buttons render the multi-color SVG natively via VectorImage; non-logo buttons
-        // tint their monochrome icon through QGCColoredImage. Plain `Row` skips visible:false items.
-        QGCVectorImage {
+        // Logo buttons render the multi-colour logo natively; non-logo buttons tint their
+        // monochrome icon through QGCColoredImage. Plain `Row` skips visible:false items.
+        // A plain Image handles both SVG and raster (PNG) logos, so rebranded builds can
+        // ship either format without breaking the toolbar.
+        Image {
             visible:                button.logo
             height:                 ScreenTools.defaultFontPixelHeight * 2
             width:                  height
+            fillMode:               Image.PreserveAspectFit
             source:                 visible ? button.icon.source : ""
             anchors.verticalCenter: parent.verticalCenter
 
             Rectangle {
                 objectName:         "toolbar_qgcUpdateAvailableBadge"
-                z:                  1   // VectorImage adds its rendered SVG as a later child
+                z:                  1
                 anchors.top:        parent.top
                 anchors.right:      parent.right
                 anchors.topMargin:  -height * 0.25

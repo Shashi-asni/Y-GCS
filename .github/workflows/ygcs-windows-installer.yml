@@ -1,0 +1,81 @@
+name: Y-GCS Windows Installer
+
+# One-click Windows build for the Y-GCS fork. Run it from the Actions tab
+# (workflow_dispatch); the NSIS installer is uploaded as a workflow artifact.
+#
+# Produces: Y-GCS-installer-AMD64.exe (unsigned).
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-installer:
+    name: Build Windows x64 installer
+    runs-on: windows-2022
+    timeout-minutes: 150
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Native package versions come from git describe and need tags.
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install build tools (CMake, Ninja, NSIS)
+        shell: pwsh
+        run: |
+          choco install cmake ninja nsis -y --no-progress
+          cmake --version
+          ninja --version
+
+      - name: Install Qt
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade aqtinstall
+          $config = Get-Content .github/build-config.json -Raw | ConvertFrom-Json
+          $version = $config.qt.version
+          $modules = $config.qt.modules -split '\s+' | Where-Object { $_ }
+          Write-Host "Installing Qt $version with modules: $($modules -join ', ')"
+          python -m aqt install-qt windows desktop $version win64_msvc2022_64 --modules @modules -O C:\Qt
+          $qtRoot = "C:\Qt\$version\msvc2022_64"
+          "QT_ROOT_DIR=$qtRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "$qtRoot\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          cmake --preset Windows `
+            -DQGC_CPACK_GENERATOR=NSIS `
+            -DQGC_ENABLE_GST_VIDEOSTREAMING=OFF `
+            -DQGC_USE_CACHE=OFF
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build --preset Windows --parallel
+
+      - name: Build NSIS installer
+        shell: pwsh
+        run: cmake --build --preset Windows --target qgc-package
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Y-GCS-Windows-Installer
+          path: build/Windows/*.exe
+          if-no-files-found: error

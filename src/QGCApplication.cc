@@ -8,6 +8,7 @@
 #include <QtGui/QFontDatabase>
 #include <QtGui/QIcon>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtQml/qqml.h>
 #include <QtQml/QQmlContext>
 #include <QtQuick/QQuickImageProvider>
 #include <QtQuick/QQuickWindow>
@@ -36,6 +37,7 @@
 #include "QGCMapEngine.h"
 #include "QGCNetworkHelper.h"
 #include "QGCVersionCheck.h"
+#include "MainWindow/YGCSScheduler.h"
 #include "SettingsManager.h"
 #include "Vehicle.h"
 #include "VideoBackend.h"
@@ -294,6 +296,7 @@ bool QGCApplication::_initQmlRootWindow()
     QGCCorePlugin::instance()->init();
     MAVLinkProtocol::instance()->init();
     MultiVehicleManager::instance()->init();
+    qmlRegisterType<YGCSScheduler>("YGCS", 1, 0, "YGCSMissionScheduler");
     _qmlAppEngine = QGCCorePlugin::instance()->createQmlApplicationEngine(this);
     QObject::connect(_qmlAppEngine, &QQmlApplicationEngine::objectCreationFailed, this, QCoreApplication::quit,
                      Qt::QueuedConnection);

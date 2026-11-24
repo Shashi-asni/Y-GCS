@@ -80,7 +80,7 @@ ToolIndicatorPage {
                 implicitHeight: root._toolButtonHeight
                 Layout.fillWidth: true
                 text: qsTr("Settings")
-                imageResource: "/res/QGCLogoWhite.svg"
+                imageResource: "/qmlimages/Gears.svg"
                 visible: !QGroundControl.corePlugin.options.combineSettingsAndSetup
                 onClicked: {
                     if (mainWindow.allowViewSwitch()) {

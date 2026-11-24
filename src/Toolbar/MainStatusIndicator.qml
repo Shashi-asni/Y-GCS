@@ -168,7 +168,7 @@ RowLayout {
                 _mainStatusBGColor = (readinessStatus === VehicleReadiness.Status.NotReady) ? "red" : "yellow"
                 return mainStatusLabel._notReadyToFlyText
             } else {
-                _mainStatusBGColor = qgcPal.brandPrimary
+                _mainStatusBGColor = "#12172a"
                 return mainStatusLabel._disconnectedText
             }
         }
