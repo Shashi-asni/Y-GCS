@@ -135,11 +135,11 @@ Popup {
             }
             const entry = panel._pendingEntry
             panel._pendingEntry = null
+            panel.errorText = ""
             entry.uploaded = true
             entry.uploadedAt = new Date().toISOString()
             panel.scheduler.add(entry)
             panel.nameField.text = ""
-            panel.errorText = ""
         }
     }
 
@@ -253,7 +253,7 @@ Popup {
         }
         _uploadAttempts = 0
         _busy = true
-        errorText = qsTr("Uploading mission to the vehicle...")
+        errorText = ""
         planController.sendToVehicle()
         _uploadPoll.restart()
     }
@@ -427,9 +427,9 @@ Popup {
 
                 Label {
                     Layout.fillWidth: true
-                    visible: panel.errorText !== ""
-                    text: panel.errorText
-                    color: panel._danger
+                    visible: panel.errorText !== "" || panel._busy
+                    text: panel._busy ? qsTr("Uploading mission to the vehicle...") : panel.errorText
+                    color: panel._busy ? "#f59e0b" : panel._danger
                     font.pixelSize: 11
                     wrapMode: Text.WordWrap
                 }

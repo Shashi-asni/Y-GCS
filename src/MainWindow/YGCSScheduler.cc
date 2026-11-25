@@ -16,7 +16,7 @@ YGCSScheduler::YGCSScheduler(QObject *parent)
     : QObject(parent)
 {
     load();
-    _timer.setInterval(5000);
+    _timer.setInterval(1000);
     connect(&_timer, &QTimer::timeout, this, &YGCSScheduler::checkDue);
     _timer.start();
 }
@@ -273,6 +273,17 @@ void YGCSScheduler::checkDue()
         const QString status = entry.value(QStringLiteral("status")).toString();
         if (status == QLatin1String("completed") || status == QLatin1String("cancelled")) {
             continue;
+        }
+        // Ten-second launch warning. The mission was uploaded when the schedule
+        // was created; the countdown only announces the upcoming MISSION_START.
+        if (entry.value(QStringLiteral("uploaded"), true).toBool()) {
+            const QDateTime upcoming = nextOccurrence(entry, now);
+            if (upcoming.isValid()) {
+                const qint64 remaining = upcoming.toMSecsSinceEpoch() - now;
+                if ((remaining > 0) && (remaining <= 10000)) {
+                    emit countdown(entry, static_cast<int>((remaining + 999) / 1000));
+                }
+            }
         }
         const QDateTime next = nextOccurrence(entry, now - 90000);
         if (!next.isValid() || next.toMSecsSinceEpoch() > now) {

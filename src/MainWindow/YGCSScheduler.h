@@ -37,6 +37,7 @@ public:
 
 signals:
     void schedulesChanged();
+    void countdown(const QVariantMap &entry, int secondsRemaining);
     void due(const QVariantMap &entry);
 
 private:

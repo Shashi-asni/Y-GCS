@@ -70,6 +70,10 @@ ApplicationWindow {
     /// Persisted mission scheduler shared with the Plan view.
     property alias missionScheduler: ygcsScheduler
 
+    // Ten-second launch countdown shown before a scheduled mission starts.
+    property var _countdownEntry: null
+    property int _countdownSeconds: 0
+
     //-------------------------------------------------------------------------
     //-- Global Scope Variables
 
@@ -101,12 +105,28 @@ ApplicationWindow {
 
     Connections {
         target: ygcsScheduler
-        function onDue(entry) { mainWindow.handleScheduledMission(entry) }
+        function onDue(entry) {
+            launchCountdownBanner.visible = false
+            mainWindow.handleScheduledMission(entry)
+        }
+        function onCountdown(entry, secondsRemaining) {
+            if (!QGroundControl.multiVehicleManager.activeVehicle) {
+                return
+            }
+            mainWindow._countdownEntry = entry
+            mainWindow._countdownSeconds = secondsRemaining
+            launchCountdownBanner.visible = true
+        }
     }
 
     Connections {
         target: QGroundControl.multiVehicleManager
-        function onActiveVehicleChanged() { ygcsScheduler.retryWaiting() }
+        function onActiveVehicleChanged() {
+            ygcsScheduler.retryWaiting()
+            if (!QGroundControl.multiVehicleManager.activeVehicle) {
+                launchCountdownBanner.visible = false
+            }
+        }
     }
 
     function handleScheduledMission(entry) {
@@ -445,6 +465,78 @@ ApplicationWindow {
         contentItem: QGCLabel {
             text:   validationErrorToast.text
             color:  qgcPal.alertText
+        }
+    }
+
+    // Ten-second launch countdown for a scheduled mission.
+    Rectangle {
+        id:             launchCountdownBanner
+        visible:        false
+        width:          Math.min(520, mainWindow.width - 40)
+        height:         86
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top:    parent.top
+        anchors.topMargin: ScreenTools.toolbarHeight + 12
+        radius:         14
+        color:          "#0b0c0f"
+        border.width:   2
+        border.color:   "#9a6bff"
+        z:              QGroundControl.zOrderTopMost + 20
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 14
+
+            Rectangle {
+                width: 56
+                height: 56
+                radius: 28
+                color: "#1b1030"
+                border.width: 2
+                border.color: "#9a6bff"
+                QGCLabel {
+                    anchors.centerIn: parent
+                    text: mainWindow._countdownSeconds
+                    color: "#f1f2f4"
+                    font.pixelSize: 26
+                    font.bold: true
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 2
+                QGCLabel {
+                    text: qsTr("FLIGHT LAUNCHING IN %1 SECONDS").arg(mainWindow._countdownSeconds)
+                    color: "#9a6bff"
+                    font.pixelSize: 12
+                    font.bold: true
+                    font.letterSpacing: 1
+                }
+                QGCLabel {
+                    Layout.fillWidth: true
+                    text: mainWindow._countdownEntry ? mainWindow._countdownEntry.name : ""
+                    color: "#f1f2f4"
+                    font.pixelSize: 14
+                    elide: Text.ElideRight
+                }
+                QGCLabel {
+                    text: qsTr("Mission already uploaded · starting automatically")
+                    color: "#8b8f98"
+                    font.pixelSize: 10
+                }
+            }
+
+            QGCButton {
+                text: qsTr("Cancel")
+                onClicked: {
+                    if (mainWindow._countdownEntry) {
+                        ygcsScheduler.setEnabled(mainWindow._countdownEntry.id, false)
+                    }
+                    launchCountdownBanner.visible = false
+                }
+            }
         }
     }
 
