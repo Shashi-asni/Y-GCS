@@ -117,6 +117,7 @@ VideoStreamResolver::Settings VideoStreamResolver::snapshot(VideoSettings* video
     settings.udpUrl = videoSettings->udpUrl()->rawValue().toString();
     settings.tcpUrl = videoSettings->tcpUrl()->rawValue().toString();
     settings.rtspUrl = videoSettings->rtspUrl()->rawValue().toString();
+    settings.rtspUrl2 = videoSettings->rtspUrl2()->rawValue().toString();
     settings.rtspTimeoutSec = videoSettings->rtspTimeout()->rawValue().toUInt();
     settings.lowLatency = videoSettings->lowLatencyMode()->rawValue().toBool();
     settings.rtpJitterLatencyMs = static_cast<int>(
@@ -146,6 +147,9 @@ std::optional<VideoReceiver::Config> VideoStreamResolver::resolve(const Settings
         uri = autoStreamUri(*streamInfo);
     } else if (role == Role::Primary) {
         uri = manualUri(settings);
+    } else if ((role == Role::Thermal) && !settings.rtspUrl2.isEmpty()) {
+        // A manually configured second RTSP stream. The vehicle's advertised thermal stream, if any, wins above.
+        uri = settings.rtspUrl2;
     }
     if (uri.isEmpty()) {
         return std::nullopt;

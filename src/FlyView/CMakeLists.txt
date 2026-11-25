@@ -71,6 +71,8 @@ qt_add_qml_module(
         VehicleWarnings.qml
         VirtualJoystick.qml
         VTOLChecklist.qml
+        YGCSFlyVideoCard.qml
+        YGCSFlyVideoCards.qml
     NO_PLUGIN
 )
 

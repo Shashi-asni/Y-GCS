@@ -46,7 +46,7 @@ Item {
     property var    _mapControl:            mapEngineLoader.item
     property real   _widgetMargin:          ScreenTools.defaultFontPixelWidth * 0.75
     property var    _layerOccluders:        widgetLayer.occluders
-    property var    _mapOccluders:          _layerOccluders.all.concat(customOverlay.customOccluders).map(r => Qt.rect(r.x + widgetLayer.x, r.y + widgetLayer.y, r.width, r.height))
+    property var    _mapOccluders:          videoDashboard.mapIsMain ? _layerOccluders.all.concat(customOverlay.customOccluders).map(r => Qt.rect(r.x + widgetLayer.x, r.y + widgetLayer.y, r.width, r.height)) : []
 
     property real   _fullItemZorder:    0
     property real   _pipItemZorder:     QGroundControl.zOrderWidgets
@@ -57,7 +57,16 @@ Item {
 
     Item {
         id:                 mapHolder
-        anchors.fill:       parent
+        x:                  videoDashboard.mapRect.x
+        y:                  videoDashboard.mapRect.y
+        width:              videoDashboard.mapRect.width
+        height:             videoDashboard.mapRect.height
+
+        Behavior on x      { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        Behavior on y      { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        Behavior on width  { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        z:                  videoDashboard.mapIsMain ? 0 : 60
 
         // Map engine switch (issue #14901): QtLocation FlyViewMap or the
         // experimental GeoMap engine, only one instantiated at a time. The
@@ -111,6 +120,7 @@ Item {
             pipView:    _pipView
             topInset:   toolbar.height
             rightInset: mapHolder.width - (widgetLayer.x + _layerOccluders.topRight.x)
+            visible:    false
         }
 
         PipView {
@@ -126,6 +136,7 @@ Item {
                                         (videoControl.pipState.state === videoControl.pipState.pipState ||
                                          (_mapControl && _mapControl.pipState.state === _mapControl.pipState.pipState))
             z:                      QGroundControl.zOrderWidgets
+            visible:                false
         }
 
         FlyViewWidgetLayer {
@@ -141,7 +152,7 @@ Item {
             pipViewRect:            _pipView.visible ? Qt.rect(_pipView.x + _pipView.occupiedRect.x - x, _pipView.y + _pipView.occupiedRect.y - y, _pipView.occupiedRect.width, _pipView.occupiedRect.height) : Qt.rect(0, height, 0, 0)
             mapControl:             _mapControl
             viewer3DCameraController: viewer3DLoader.item ? viewer3DLoader.item.cameraController : null
-            visible:                !QGroundControl.videoManager.fullScreen
+            visible:                !QGroundControl.videoManager.fullScreen && videoDashboard.mapIsMain
         }
 
         FlyViewCustomLayer {
@@ -150,7 +161,7 @@ Item {
             z:                  _fullItemZorder + 2
             occluders:          _layerOccluders
             mapControl:         _mapControl
-            visible:            !QGroundControl.videoManager.fullScreen
+            visible:            !QGroundControl.videoManager.fullScreen && videoDashboard.mapIsMain
         }
 
         // Development tool for visualizing the occluders, show if needed
@@ -202,9 +213,54 @@ Item {
         }
     }
 
+    YGCSFlyVideoCards {
+        id:         videoDashboard
+        anchors.fill: parent
+        z:          50
+        visible:    !_is3DMode && !QGroundControl.videoManager.fullScreen
+    }
+
+    // Clickable border/label over the map while it is a small card.
+    Rectangle {
+        visible: !videoDashboard.mapIsMain && !_is3DMode && !QGroundControl.videoManager.fullScreen
+        x:       videoDashboard.small1Rect.x
+        y:       videoDashboard.small1Rect.y
+        width:   videoDashboard.small1Rect.width
+        height:  videoDashboard.small1Rect.height
+        z:       70
+        color:   "transparent"
+        radius:  10
+        border.width: 1
+        border.color: "#9a6bff"
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.margins: 8
+            width: mapLabel.width + 16
+            height: mapLabel.height + 8
+            radius: 8
+            color: Qt.rgba(0, 0, 0, 0.6)
+            QGCLabel {
+                id: mapLabel
+                anchors.centerIn: parent
+                text: qsTr("MAP · tap to expand")
+                color: "#f1f2f4"
+                font.pixelSize: 10
+                font.bold: true
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: videoDashboard.mainState = 0
+        }
+    }
+
     FlyViewToolBar {
         id:                 toolbar
         guidedValueSlider:  _guidedValueSlider
         visible:            !QGroundControl.videoManager.fullScreen
+        z:                  1000
     }
 }

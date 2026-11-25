@@ -30,6 +30,15 @@
             "keywords": "rtsp,video url,stream url"
         },
         {
+            "name": "rtspUrl2",
+            "shortDesc": "Network address for the second (thermal) RTSP video stream.",
+            "longDesc": "Second manually configured RTSP stream, shown in the Fly view's thermal video card. A thermal stream advertised by the connected vehicle takes precedence.",
+            "type": "string",
+            "default": "",
+            "label": "RTSP URL 2 (Thermal)",
+            "keywords": "rtsp,video url,stream url,thermal,secondary"
+        },
+        {
             "name": "tcpUrl",
             "shortDesc": "Network address and port for TCP video stream (e.g. 192.168.143.200:3001).",
             "longDesc": "TCP url address and port to bind to for video stream. Example: 192.168.143.200:3001",
@@ -173,7 +182,7 @@
             "type": "uint32",
             "enumStrings": "GStreamer,Qt Multimedia",
             "enumValues": "0,1",
-            "default": 0,
+            "default": 1,
             "label": "Video backend",
             "keywords": "gstreamer,qt multimedia,ffmpeg,backend,player,decoder"
         },
